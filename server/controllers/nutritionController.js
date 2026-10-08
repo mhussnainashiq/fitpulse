@@ -1,0 +1,5 @@
+import Nutrition from "../models/Nutrition.js";
+export async function list(req,res,next){try{res.json({success:true,logs:await Nutrition.find({user:req.userId}).sort({date:-1})})}catch(e){next(e)}}
+export async function create(req,res,next){try{res.status(201).json({success:true,log:await Nutrition.create({...req.body,user:req.userId})})}catch(e){next(e)}}
+export async function update(req,res,next){try{const log=await Nutrition.findOneAndUpdate({_id:req.params.id,user:req.userId},req.body,{new:true,runValidators:true});if(!log)return res.status(404).json({success:false,message:"Nutrition log not found."});res.json({success:true,log})}catch(e){next(e)}}
+export async function remove(req,res,next){try{await Nutrition.findOneAndDelete({_id:req.params.id,user:req.userId});res.json({success:true})}catch(e){next(e)}}

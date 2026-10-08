@@ -1,0 +1,5 @@
+import Progress from "../models/Progress.js";
+export async function list(req,res,next){try{res.json({success:true,progress:await Progress.find({user:req.userId}).sort({date:1})})}catch(e){next(e)}}
+export async function create(req,res,next){try{res.status(201).json({success:true,progress:await Progress.create({...req.body,user:req.userId})})}catch(e){next(e)}}
+export async function update(req,res,next){try{const p=await Progress.findOneAndUpdate({_id:req.params.id,user:req.userId},req.body,{new:true,runValidators:true});if(!p)return res.status(404).json({success:false,message:"Progress not found."});res.json({success:true,progress:p})}catch(e){next(e)}}
+export async function remove(req,res,next){try{await Progress.findOneAndDelete({_id:req.params.id,user:req.userId});res.json({success:true})}catch(e){next(e)}}

@@ -1,0 +1,14 @@
+import { useEffect, useState } from "react";
+import { ArrowLeft, Save } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { workoutService } from "../services/workoutService";
+
+const initial={name:"",type:"Strength",date:new Date().toISOString().slice(0,10),duration:"",caloriesBurned:"",intensity:"Medium",notes:""};
+
+export default function WorkoutForm(){
+  const {id}=useParams(); const edit=Boolean(id); const nav=useNavigate(); const [form,setForm]=useState(initial); const [saving,setSaving]=useState(false); const [error,setError]=useState("");
+  useEffect(()=>{if(edit)workoutService.get(id).then(w=>setForm({...w,date:new Date(w.date).toISOString().slice(0,10)})).catch(e=>setError(e.response?.data?.message||"Unable to load workout."))},[edit,id]);
+  function change(e){setForm({...form,[e.target.name]:e.target.value})}
+  async function submit(e){e.preventDefault();setError("");setSaving(true);try{const payload={...form,duration:Number(form.duration),caloriesBurned:Number(form.caloriesBurned)};edit?await workoutService.update(id,payload):await workoutService.create(payload);nav("/workouts")}catch(e){setError(e.response?.data?.message||"Unable to save workout.")}finally{setSaving(false)}}
+  return <div><div className="page-heading"><div><Link to="/workouts" className="back-link"><ArrowLeft size={16}/> Back to workouts</Link><h1>{edit?"Edit Workout":"Add Workout"}</h1><p>Capture the details of your training session.</p></div></div>{error&&<div className="alert error">{error}</div>}<form className="form-card" onSubmit={submit}><div className="form-grid"><label>Workout name<input name="name" required value={form.name} onChange={change} placeholder="Upper Body Strength"/></label><label>Workout type<select name="type" value={form.type} onChange={change}>{["Strength","Cardio","HIIT","Yoga","Running","Cycling","Swimming","Walking","Other"].map(x=><option key={x}>{x}</option>)}</select></label><label>Date<input type="date" name="date" required value={form.date} onChange={change}/></label><label>Duration (minutes)<input type="number" min="1" name="duration" required value={form.duration} onChange={change}/></label><label>Calories burned<input type="number" min="0" name="caloriesBurned" required value={form.caloriesBurned} onChange={change}/></label><label>Intensity<select name="intensity" value={form.intensity} onChange={change}><option>Low</option><option>Medium</option><option>High</option></select></label></div><label>Notes<textarea name="notes" rows="5" value={form.notes} onChange={change} placeholder="How did the workout feel?"/></label><div className="form-actions"><Link className="btn btn-light" to="/workouts">Cancel</Link><button className="btn btn-primary" disabled={saving}><Save size={17}/>{saving?"Saving...":"Save Workout"}</button></div></form></div>;
+}

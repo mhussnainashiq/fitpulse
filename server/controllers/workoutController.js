@@ -1,0 +1,6 @@
+import Workout from "../models/Workout.js";
+export async function list(req,res,next){try{const workouts=await Workout.find({user:req.userId}).sort({date:-1});res.json({success:true,workouts})}catch(e){next(e)}}
+export async function get(req,res,next){try{const workout=await Workout.findOne({_id:req.params.id,user:req.userId});if(!workout)return res.status(404).json({success:false,message:"Workout not found."});res.json({success:true,workout})}catch(e){next(e)}}
+export async function create(req,res,next){try{const workout=await Workout.create({...req.body,user:req.userId});res.status(201).json({success:true,workout})}catch(e){next(e)}}
+export async function update(req,res,next){try{const workout=await Workout.findOneAndUpdate({_id:req.params.id,user:req.userId},req.body,{new:true,runValidators:true});if(!workout)return res.status(404).json({success:false,message:"Workout not found."});res.json({success:true,workout})}catch(e){next(e)}}
+export async function remove(req,res,next){try{const workout=await Workout.findOneAndDelete({_id:req.params.id,user:req.userId});if(!workout)return res.status(404).json({success:false,message:"Workout not found."});res.json({success:true})}catch(e){next(e)}}
